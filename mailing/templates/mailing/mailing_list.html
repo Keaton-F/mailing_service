@@ -1,0 +1,35 @@
+{% extends "mailing/base.html" %}
+{% block title %}Рассылки{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Рассылки</h2>
+    <a href="{% url 'mailing:mailing_create' %}" class="btn btn-primary">+ Создать рассылку</a>
+</div>
+<div class="card shadow-sm">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+        <tr><th>ID</th><th>Сообщение</th><th>Начало</th><th>Окончание</th><th>Статус</th><th class="text-end">Действия</th></tr>
+        </thead>
+        <tbody>
+        {% for mailing in mailings %}
+            <tr>
+                <td><a href="{% url 'mailing:mailing_detail' mailing.pk %}">#{{ mailing.pk }}</a></td>
+                <td>{{ mailing.message.subject }}</td>
+                <td>{{ mailing.start_time|date:"d.m.Y H:i" }}</td>
+                <td>{{ mailing.end_time|date:"d.m.Y H:i" }}</td>
+                <td><span class="badge bg-info text-dark">{{ mailing.current_status }}</span></td>
+                <td class="text-end">
+                    <a href="{% url 'mailing:mailing_detail' mailing.pk %}" class="btn btn-sm btn-outline-primary">Открыть</a>
+                    {% if mailing.owner == user %}
+                        <a href="{% url 'mailing:mailing_update' mailing.pk %}" class="btn btn-sm btn-outline-warning">Изменить</a>
+                        <a href="{% url 'mailing:mailing_delete' mailing.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="text-center text-muted py-4">Рассылок пока нет.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
