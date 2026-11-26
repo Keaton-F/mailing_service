@@ -1,0 +1,37 @@
+{% extends "mailing/base.html" %}
+
+{% block title %}Главная — Сервис рассылок{% endblock %}
+
+{% block content %}
+<div class="p-4 mb-4 bg-white rounded-3 shadow-sm">
+    <h1 class="display-6 fw-bold">Панель управления рассылками</h1>
+    <p class="text-muted mb-0">Актуальная статистика по всем кампаниям и базе получателей.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card text-center shadow-sm border-primary">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Всего рассылок</h5>
+                <p class="display-4 fw-bold text-primary mb-0">{{ total_mailings }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center shadow-sm border-success">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Активных рассылок</h5>
+                <p class="display-4 fw-bold text-success mb-0">{{ active_mailings }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center shadow-sm border-info">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Уникальных получателей</h5>
+                <p class="display-4 fw-bold text-info mb-0">{{ unique_clients }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
