@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.decorators.cache import cache_page
 
 from . import views
 
@@ -12,8 +13,8 @@ urlpatterns = [
     path("clients/create/", views.ClientCreateView.as_view(), name="client_create"),
     path("clients/<int:pk>/update/", views.ClientUpdateView.as_view(), name="client_update"),
     path("clients/<int:pk>/delete/", views.ClientDeleteView.as_view(), name="client_delete"),
-    # Сообщения
-    path("messages/", views.MessageListView.as_view(), name="message_list"),
+    # Сообщения (с кешированием списка на 5 минут)
+    path("messages/", cache_page(60 * 5)(views.MessageListView.as_view()), name="message_list"),
     path("messages/<int:pk>/", views.MessageDetailView.as_view(), name="message_detail"),
     path("messages/create/", views.MessageCreateView.as_view(), name="message_create"),
     path("messages/<int:pk>/update/", views.MessageUpdateView.as_view(), name="message_update"),
@@ -25,6 +26,7 @@ urlpatterns = [
     path("mailings/<int:pk>/update/", views.MailingUpdateView.as_view(), name="mailing_update"),
     path("mailings/<int:pk>/delete/", views.MailingDeleteView.as_view(), name="mailing_delete"),
     path("mailings/<int:pk>/send/", views.MailingSendView.as_view(), name="mailing_send"),
+    path("mailings/<int:pk>/disable/", views.MailingDisableView.as_view(), name="mailing_disable"),
     # Попытки
     path("attempts/", views.MailingAttemptListView.as_view(), name="attempt_list"),
 ]

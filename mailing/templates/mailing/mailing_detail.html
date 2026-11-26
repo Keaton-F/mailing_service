@@ -7,6 +7,7 @@
         <span class="badge bg-primary fs-6">{{ mailing.current_status }}</span>
     </div>
     <div class="card-body">
+        <p><strong>Владелец:</strong> {{ mailing.owner.email|default:"Не указан" }}</p>
         <p><strong>Сообщение:</strong> {{ mailing.message.subject }}</p>
         <p><strong>Время начала:</strong> {{ mailing.start_time|date:"d.m.Y H:i" }}</p>
         <p><strong>Время окончания:</strong> {{ mailing.end_time|date:"d.m.Y H:i" }}</p>
@@ -19,12 +20,22 @@
         </p>
 
         <div class="mt-4 d-flex gap-2">
-            <form method="post" action="{% url 'mailing:mailing_send' mailing.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success">🚀 Запустить рассылку сейчас</button>
-            </form>
-            <a href="{% url 'mailing:mailing_update' mailing.pk %}" class="btn btn-warning">Редактировать</a>
-            <a href="{% url 'mailing:mailing_delete' mailing.pk %}" class="btn btn-danger">Удалить</a>
+            {% if mailing.owner == user %}
+                <form method="post" action="{% url 'mailing:mailing_send' mailing.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">🚀 Запустить рассылку сейчас</button>
+                </form>
+                <a href="{% url 'mailing:mailing_update' mailing.pk %}" class="btn btn-warning">Редактировать</a>
+                <a href="{% url 'mailing:mailing_delete' mailing.pk %}" class="btn btn-danger">Удалить</a>
+            {% endif %}
+
+            {% if perms.mailing.can_disable_mailing and mailing.current_status != "Завершена" %}
+                <form method="post" action="{% url 'mailing:mailing_disable' mailing.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger">Отключить рассылку</button>
+                </form>
+            {% endif %}
+
             <a href="{% url 'mailing:mailing_list' %}" class="btn btn-secondary">К списку</a>
         </div>
     </div>

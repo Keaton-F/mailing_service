@@ -17,8 +17,10 @@
                 <td>{{ client.email }}</td>
                 <td>{{ client.comment|default:"—"|truncatechars:50 }}</td>
                 <td class="text-end">
-                    <a href="{% url 'mailing:client_update' client.pk %}" class="btn btn-sm btn-outline-warning">Изменить</a>
-                    <a href="{% url 'mailing:client_delete' client.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                    {% if client.owner == user %}
+                        <a href="{% url 'mailing:client_update' client.pk %}" class="btn btn-sm btn-outline-warning">Изменить</a>
+                        <a href="{% url 'mailing:client_delete' client.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                    {% endif %}
                 </td>
             </tr>
         {% empty %}

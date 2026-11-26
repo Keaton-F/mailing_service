@@ -16,8 +16,10 @@
                 <td><a href="{% url 'mailing:message_detail' msg.pk %}">{{ msg.subject }}</a></td>
                 <td>{{ msg.body|truncatechars:60 }}</td>
                 <td class="text-end">
-                    <a href="{% url 'mailing:message_update' msg.pk %}" class="btn btn-sm btn-outline-warning">Изменить</a>
-                    <a href="{% url 'mailing:message_delete' msg.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                    {% if msg.owner == user %}
+                        <a href="{% url 'mailing:message_update' msg.pk %}" class="btn btn-sm btn-outline-warning">Изменить</a>
+                        <a href="{% url 'mailing:message_delete' msg.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                    {% endif %}
                 </td>
             </tr>
         {% empty %}
