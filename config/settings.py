@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from django.contrib.messages import constants as message_constants
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -65,18 +66,18 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS: list[dict[str, str]] = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    # },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    # },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    # },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    # },
 ]
 
 LANGUAGE_CODE = "ru-ru"
@@ -117,3 +118,5 @@ CACHES = {
         "LOCATION": "redis://127.0.0.1:6379/1",
     }
 }
+
+MESSAGE_TAGS = {message_constants.ERROR: "danger"}

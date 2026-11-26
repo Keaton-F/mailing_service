@@ -1,6 +1,8 @@
-from typing import Any
+from typing import Any, cast
 
 from django import forms
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from .models import Client, Mailing, Message
 
@@ -34,7 +36,7 @@ class MessageForm(StyleFormMixin, forms.ModelForm):
 class MailingForm(StyleFormMixin, forms.ModelForm):
     class Meta:
         model = Mailing
-        fields = ("start_time", "end_time", "message", "clients")
+        fields = ("start_time", "end_time", "message", "recipients")
         widgets = {
             "start_time": forms.DateTimeInput(
                 attrs={"type": "datetime-local"},
@@ -45,3 +47,16 @@ class MailingForm(StyleFormMixin, forms.ModelForm):
                 format="%Y-%m-%dT%H:%M",
             ),
         }
+
+    def clean(self) -> dict[str, Any]:
+        cleaned_data = cast(dict[str, Any], super().clean())
+        start_time = cleaned_data.get("start_time")
+        end_time = cleaned_data.get("end_time")
+
+        if start_time and not self.instance.pk and start_time < timezone.now():
+            raise ValidationError("Дата и время начала отправки не могут быть в прошлом.")
+
+        if start_time and end_time and start_time >= end_time:
+            raise ValidationError("Дата и время начала отправки должны быть раньше времени окончания.")
+
+        return cleaned_data

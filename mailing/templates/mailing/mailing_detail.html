@@ -4,14 +4,14 @@
 <div class="card shadow-sm mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3 class="mb-0">Рассылка #{{ mailing.pk }}</h3>
-        <span class="badge bg-primary fs-6">{{ mailing.status }}</span>
+        <span class="badge bg-primary fs-6">{{ mailing.current_status }}</span>
     </div>
     <div class="card-body">
         <p><strong>Сообщение:</strong> {{ mailing.message.subject }}</p>
         <p><strong>Время начала:</strong> {{ mailing.start_time|date:"d.m.Y H:i" }}</p>
         <p><strong>Время окончания:</strong> {{ mailing.end_time|date:"d.m.Y H:i" }}</p>
-        <p><strong>Получатели ({{ mailing.clients.count }}):</strong>
-            {% for client in mailing.clients.all %}
+        <p><strong>Получатели ({{ mailing.recipients.count }}):</strong>
+            {% for client in mailing.recipients.all %}
                 <span class="badge bg-secondary">{{ client.email }}</span>
             {% empty %}
                 <span class="text-muted">Не выбраны</span>

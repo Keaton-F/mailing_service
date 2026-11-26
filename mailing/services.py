@@ -7,45 +7,51 @@ from django.utils import timezone
 from .models import Mailing, MailingAttempt
 
 
-def send_mailing(mailing: Mailing) -> None:
-    """Отправляет рассылку всем привязанным получателям и фиксирует попытку."""
+def send_mailing(mailing: Mailing) -> tuple[bool, str]:
+    """Проверяет временное окно, отправляет письма каждому получателю и сохраняет попытки через bulk_create."""
     now = timezone.now()
 
-    # Если время рассылки еще не наступило или уже прошло, при ручном запуске обновляем статус
-    if mailing.end_time < now:
+    if not (mailing.start_time <= now <= mailing.end_time):
+        if now < mailing.start_time:
+            mailing.status = Mailing.STATUS_CREATED
+            mailing.save(update_fields=["status"])
+            return False, "Время начала рассылки еще не наступило."
         mailing.status = Mailing.STATUS_FINISHED
         mailing.save(update_fields=["status"])
-        return
+        return False, "Время окончания рассылки уже прошло."
 
     mailing.status = Mailing.STATUS_STARTED
     mailing.save(update_fields=["status"])
 
-    recipient_emails = list(mailing.clients.values_list("email", flat=True))
+    recipients = list(mailing.recipients.all())
+    if not recipients:
+        return False, "В рассылке не выбрано ни одного получателя."
 
-    if not recipient_emails:
-        MailingAttempt.objects.create(
-            status=MailingAttempt.STATUS_FAILED,
-            server_response="Нет получателей для отправки рассылки.",
-            mailing=mailing,
-        )
-        return
+    attempts: list[MailingAttempt] = []
+    for client in recipients:
+        try:
+            send_mail(
+                subject=mailing.message.subject,
+                message=mailing.message.body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[client.email],
+                fail_silently=False,
+            )
+            attempts.append(
+                MailingAttempt(
+                    status=MailingAttempt.STATUS_SUCCESS,
+                    server_response=f"Письмо для {client.email} успешно отправлено.",
+                    mailing=mailing,
+                )
+            )
+        except (smtplib.SMTPException, Exception) as exc:
+            attempts.append(
+                MailingAttempt(
+                    status=MailingAttempt.STATUS_FAILED,
+                    server_response=f"Ошибка отправки для {client.email}: {exc}",
+                    mailing=mailing,
+                )
+            )
 
-    try:
-        sent_count = send_mail(
-            subject=mailing.message.subject,
-            message=mailing.message.body,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=recipient_emails,
-            fail_silently=False,
-        )
-        MailingAttempt.objects.create(
-            status=MailingAttempt.STATUS_SUCCESS,
-            server_response=f"Письма успешно отправлены ({sent_count} шт.).",
-            mailing=mailing,
-        )
-    except (smtplib.SMTPException, Exception) as exc:
-        MailingAttempt.objects.create(
-            status=MailingAttempt.STATUS_FAILED,
-            server_response=str(exc),
-            mailing=mailing,
-        )
+    MailingAttempt.objects.bulk_create(attempts)
+    return True, f"Рассылка выполнена. Обработано получателей: {len(attempts)}."

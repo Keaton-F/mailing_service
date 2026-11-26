@@ -25,6 +25,7 @@ from django.urls import include, path
 urlpatterns: list[Any] = [
     path("admin/", admin.site.urls),
     path("", include("mailing.urls")),
+    path("users/", include("users.urls")),
 ]
 
 if settings.DEBUG:

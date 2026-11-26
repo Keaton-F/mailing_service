@@ -17,7 +17,7 @@
                 <td>{{ mailing.message.subject }}</td>
                 <td>{{ mailing.start_time|date:"d.m.Y H:i" }}</td>
                 <td>{{ mailing.end_time|date:"d.m.Y H:i" }}</td>
-                <td><span class="badge bg-info text-dark">{{ mailing.status }}</span></td>
+                <td><span class="badge bg-info text-dark">{{ mailing.current_status }}</span></td>
                 <td class="text-end">
                     <a href="{% url 'mailing:mailing_detail' mailing.pk %}" class="btn btn-sm btn-outline-primary">Открыть</a>
                     <a href="{% url 'mailing:mailing_update' mailing.pk %}" class="btn btn-sm btn-outline-warning">Изменить</a>

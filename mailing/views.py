@@ -1,8 +1,10 @@
 from typing import Any
 
+from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 
@@ -18,8 +20,13 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
+        now = timezone.now()
         context["total_mailings"] = Mailing.objects.count()
-        context["active_mailings"] = Mailing.objects.filter(status=Mailing.STATUS_STARTED).count()
+        context["active_mailings"] = Mailing.objects.filter(
+            status=Mailing.STATUS_STARTED,
+            start_time__lte=now,
+            end_time__gte=now,
+        ).count()
         context["unique_clients"] = Client.objects.values("email").distinct().count()
         return context
 
@@ -128,7 +135,11 @@ class MailingSendView(View):
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
         mailing = get_object_or_404(Mailing, pk=pk)
-        send_mailing(mailing)
+        success, result_message = send_mailing(mailing)
+        if success:
+            messages.success(request, result_message)
+        else:
+            messages.error(request, result_message)
         return redirect("mailing:mailing_detail", pk=pk)
 
 

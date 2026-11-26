@@ -71,7 +71,7 @@ class Mailing(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Сообщение",
     )
-    clients = models.ManyToManyField(
+    recipients = models.ManyToManyField(
         Client,
         verbose_name="Получатели",
     )
@@ -90,8 +90,20 @@ class Mailing(models.Model):
             ("can_disable_mailing", "Может отключать рассылки"),
         ]
 
+    @property
+    def current_status(self) -> str:
+        """Динамически вычисляет актуальный статус рассылки по текущему времени."""
+        from django.utils import timezone
+
+        now = timezone.now()
+        if now < self.start_time:
+            return self.STATUS_CREATED
+        if self.start_time <= now <= self.end_time:
+            return self.STATUS_STARTED
+        return self.STATUS_FINISHED
+
     def __str__(self) -> str:
-        return f"Рассылка #{self.pk} ({self.status})"
+        return f"Рассылка #{self.pk} ({self.current_status})"
 
 
 class MailingAttempt(models.Model):
